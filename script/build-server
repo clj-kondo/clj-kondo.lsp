@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+cd server
+lein uberjar
+cp target/clj-kondo.lsp-0.0.1-SNAPSHOT-standalone.jar ../vscode-extension/clj-kondo.lsp-standalone.jar
