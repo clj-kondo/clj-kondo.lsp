@@ -13,6 +13,9 @@
     "vscode": "^1.33.0"
   },
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:clojure"
+  ],
   "scripts": {
     "vscode:prepublish": "npm run update-vscode && npm run compile",
     "compile": "tsc -b",
