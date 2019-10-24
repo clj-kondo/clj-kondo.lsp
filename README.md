@@ -1,5 +1,10 @@
 # clj-kondo.lsp
 
+This repo contains the code for:
+
+- the clj-kondo language server (see [LSP](https://microsoft.github.io/language-server-protocol/)).
+- the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=borkdude.clj-kondo) which bundles the server and client.
+
 ## Build
 
 ### Server
@@ -16,7 +21,7 @@ Enter the `vscode-extension` directory:
 
      cd vscode-extension
 
-To obtain the dependencies, run:
+To intall the dependencies, run:
 
      npm install
 
