@@ -2,7 +2,7 @@
 
 This repo contains the code for:
 
-- the clj-kondo language server (see [LSP](https://microsoft.github.io/language-server-protocol/)).
+- the [clj-kondo](https://github.com/borkdude/clj-kondo) language server (see [LSP](https://microsoft.github.io/language-server-protocol/)).
 - the [VSCode extension](https://marketplace.visualstudio.com/items?itemName=borkdude.clj-kondo) which bundles the server and client.
 
 ## Build
