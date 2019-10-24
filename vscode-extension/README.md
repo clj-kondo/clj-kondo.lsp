@@ -7,7 +7,8 @@ installation.
 After installation, the linter will run after opening and changing Clojure
 related files.
 
-For more information about clj-kondo, go [here](https://github.com/borkdude/clj-kondo).
+The code for this extension is hosted [here](https://github.com/borkdude/clj-kondo.lsp).
+For more information about clj-kondo itself, go [here](https://github.com/borkdude/clj-kondo).
 
 ## License
 
