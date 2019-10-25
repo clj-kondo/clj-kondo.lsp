@@ -34,6 +34,7 @@ function welcome(version: string) { return `-- Welcome to clj-kondo v${version}.
 export function activate(context: ExtensionContext) {
 
     const channel = window.createOutputChannel('clj-kondo');
+    context.subscriptions.push(channel);
 
     // channel.show(true);
 
@@ -42,8 +43,8 @@ export function activate(context: ExtensionContext) {
     let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
     let jarPath = path.join(context.extensionPath, 'clj-kondo.lsp-standalone.jar');
     let serverOptions: ServerOptions = {
-        run: {command: 'java', args:['-jar', jarPath]},
-        debug: {command: 'java', args:['-jar', jarPath]}
+        run: {command: 'java', args:['-jar', jarPath] },
+        debug: {command: 'java', args:['-jar', jarPath]},
     }
 
     // If the extension is launched in debug mode then the debug server options are used
@@ -52,27 +53,22 @@ export function activate(context: ExtensionContext) {
     // Options to control the language client
     let clientOptions: LanguageClientOptions = {
         // Register the server for plain text documents
-        documentSelector: [{ scheme: 'file', language: 'clojure' }]
+        documentSelector: [{ scheme: 'file', language: 'clojure' }],
+        outputChannel: channel
     };
 
     // Create the language client and start the client.
     client = new LanguageClient(
-        'languageServerExample',
-        'Language Server Example',
+        'clj-kondo',
+        'clj-kondo',
         serverOptions,
         clientOptions
     );
 
-    channel.show(true);
-
     channel.appendLine(welcome(readVersion(context.extensionPath)));
 
-    client.onReady().then(_ => {
-        channel.appendLine('Started clj-kondo language server.');
-    });
-
     // Start the client. This will also launch the server
-    client.start();
+    context.subscriptions.push(client.start());
 }
 
 export function deactivate(): Thenable<void> | undefined {

@@ -33,7 +33,6 @@
 (set! *warn-on-reflection* true)
 
 (defonce proxy-state (atom nil))
-(defonce exit-state (promise))
 
 (defn log! [level & msg]
   (when-let [client @proxy-state]
@@ -131,10 +130,12 @@
     (^CompletableFuture initialized [^InitializedParams params]
      (info "Clj-kondo language server loaded. Please report any issues to https://github.com/borkdude/clj-kondo."))
     (^CompletableFuture shutdown []
-     (CompletableFuture/completedFuture @exit-state))
+     (info "Clj-kondo language server shutting down.")
+     (CompletableFuture/completedFuture 0))
 
     (^void exit []
-     (deliver exit-state 0))
+     (shutdown-agents)
+     (System/exit 0))
 
     (getTextDocumentService []
       (LSPTextDocumentService.))
@@ -145,6 +146,5 @@
 (defn run-server! []
   (let [launcher (LSPLauncher/createServerLauncher server System/in System/out)
         proxy ^LanguageClient (.getRemoteProxy launcher)]
-    (.startListening launcher)
     (reset! proxy-state proxy)
-    @exit-state))
+    (.startListening launcher)))
