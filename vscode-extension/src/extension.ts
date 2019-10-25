@@ -4,7 +4,8 @@
  * ------------------------------------------------------------------------------------------ */
 
 import * as path from 'path';
-import { workspace, ExtensionContext } from 'vscode';
+import { workspace, ExtensionContext, window } from 'vscode';
+import { readFileSync } from 'fs';
 
 import {
     LanguageClient,
@@ -15,7 +16,27 @@ import {
 
 let client: LanguageClient;
 
+function readVersion(extensionDir: string) {
+    return readFileSync(path.join(extensionDir,'CLJ_KONDO_VERSION')).toString().trim();
+}
+
+function welcome(version: string) { return `Welcome to clj-kondo v${version}. 
+
+To configure clj-kondo, create a .clj-kondo directory in the root of your workspace and place a config.edn file in it.
+Check out the configuration documentation here: https://github.com/borkdude/clj-kondo/blob/master/doc/config.md.
+
+If you have questions, join the #clj-kondo channel on Clojurians slack.
+Report issues at: https://github.com/borkdude/clj-kondo.
+
+Happy linting!
+`};
+
 export function activate(context: ExtensionContext) {
+
+    const channel = window.createOutputChannel('clj-kondo');
+
+    // channel.show(true);
+
     // The debug options for the server
     // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
     let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
@@ -42,8 +63,16 @@ export function activate(context: ExtensionContext) {
         clientOptions
     );
 
+    channel.show(true);
+
+    channel.appendLine(welcome(readVersion(context.extensionPath)));
+
+    client.onReady().then(_ => {
+        channel.appendLine('Started clj-kondo language server.');
+    });
+
     // Start the client. This will also launch the server
-    client.start();
+    client.start(); 
 }
 
 export function deactivate(): Thenable<void> | undefined {
