@@ -20,15 +20,15 @@ function readVersion(extensionDir: string) {
     return readFileSync(path.join(extensionDir,'CLJ_KONDO_VERSION')).toString().trim();
 }
 
-function welcome(version: string) { return `Welcome to clj-kondo v${version}. 
-
-To configure clj-kondo, create a .clj-kondo directory in the root of your workspace and place a config.edn file in it.
-Check out the configuration documentation here: https://github.com/borkdude/clj-kondo/blob/master/doc/config.md.
-
-If you have questions, join the #clj-kondo channel on Clojurians slack.
-Report issues at: https://github.com/borkdude/clj-kondo.
-
-Happy linting!
+function welcome(version: string) { return `-- Welcome to clj-kondo v${version}.
+--
+-- To configure clj-kondo, create a .clj-kondo directory in the root of your workspace and place a config.edn file in it.
+-- Check out the configuration documentation here: https://github.com/borkdude/clj-kondo/blob/master/doc/config.md.
+--
+-- If you have questions, join the #clj-kondo channel on Clojurians slack.
+-- Report issues at: https://github.com/borkdude/clj-kondo.
+--
+-- Happy linting!
 `};
 
 export function activate(context: ExtensionContext) {
@@ -72,7 +72,7 @@ export function activate(context: ExtensionContext) {
     });
 
     // Start the client. This will also launch the server
-    client.start(); 
+    client.start();
 }
 
 export function deactivate(): Thenable<void> | undefined {
