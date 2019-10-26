@@ -10,6 +10,10 @@ related files.
 The code for this extension is hosted [here](https://github.com/borkdude/clj-kondo.lsp).
 For more information about clj-kondo itself, go [here](https://github.com/borkdude/clj-kondo).
 
+## Changes
+
+### 0.0.6 bump clj-kondo lib to v2019.10.16.
+
 ## License
 
 Copyright © 2019 Michiel Borkent
