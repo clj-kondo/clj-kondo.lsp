@@ -12,7 +12,17 @@ For more information about clj-kondo itself, go [here](https://github.com/borkdu
 
 ## Changes
 
-### 0.0.6 bump clj-kondo lib to v2019.10.16.
+### 0.0.6
+
+- bump clj-kondo lib to v2019.10.26.
+
+### 0.0.5
+
+- fix: language server would not shut down when editor closes
+
+### 0.0.4
+
+- add logo
 
 ## License
 
