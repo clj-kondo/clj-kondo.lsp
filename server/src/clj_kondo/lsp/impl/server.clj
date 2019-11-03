@@ -82,7 +82,9 @@
   (when-let [dot-idx (str/last-index-of uri ".")]
     (let [ext (subs uri (inc dot-idx))
           lang (keyword ext)]
-      lang)))
+      (if (contains? #{:clj :cljs :cljc :edn} lang)
+        lang
+        :clj))))
 
 (defn lint! [text uri]
   (let [lang (uri->lang uri)
