@@ -12,6 +12,10 @@ For more information about clj-kondo itself, go [here](https://github.com/borkdu
 
 ## Changes
 
+### 0.0.9
+
+- bump clj-kondo lib to v2019.11.07.
+
 ### 0.0.8
 
 - fix error when opening build.boot file (which is registered as a Clojure file by Calva)
