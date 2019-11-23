@@ -12,6 +12,10 @@ For more information about clj-kondo itself, go [here](https://github.com/borkdu
 
 ## Changes
 
+### 0.0.10
+
+- bump clj-kondo lib to v2019.11.23.
+
 ### 0.0.9
 
 - bump clj-kondo lib to v2019.11.07.
