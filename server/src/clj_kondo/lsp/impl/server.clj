@@ -70,7 +70,7 @@
         ;; col (max 0 (dec col))
         ]
     (Diagnostic. (Range. (Position. row col)
-                         (Position. row (+ col 1)))
+                         (Position. row col))
                  message
                  (case level
                    :info DiagnosticSeverity/Information
