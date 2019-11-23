@@ -3,7 +3,7 @@
   "description": "Clj-kondo language server and client bundled in one extension.",
   "author": "Michiel Borkent",
   "license": "EPL-1",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "publisher": "borkdude",
   "repository": {
     "type": "git",

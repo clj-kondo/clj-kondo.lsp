@@ -12,6 +12,10 @@ For more information about clj-kondo itself, go [here](https://github.com/borkdu
 
 ## Changes
 
+### 0.0.11
+
+- Undo unintended change to column of diagnostic location
+
 ### 0.0.10
 
 - bump clj-kondo lib to v2019.11.23.
