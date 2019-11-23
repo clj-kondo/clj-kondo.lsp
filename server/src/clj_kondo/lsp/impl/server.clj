@@ -22,7 +22,6 @@
             ServerCapabilities
             TextDocumentIdentifier
             TextDocumentContentChangeEvent
-            TextDocumentPositionParams
             TextDocumentSyncKind
             TextDocumentSyncOptions]
            [org.eclipse.lsp4j.launch LSPLauncher]
@@ -68,9 +67,10 @@
 
 (defn finding->Diagnostic [{:keys [:row :col :message :level]}]
   (let [row (max 0 (dec row))
-        col (max 0 (dec col))]
+        ;; col (max 0 (dec col))
+        ]
     (Diagnostic. (Range. (Position. row col)
-                         (Position. row col))
+                         (Position. row (+ col 1)))
                  message
                  (case level
                    :info DiagnosticSeverity/Information
