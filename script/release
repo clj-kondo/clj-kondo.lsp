@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+java -version
 script/update-project.clj
 cd server
 lein uberjar
