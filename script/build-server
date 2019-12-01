@@ -3,4 +3,4 @@
 cd server
 lein run -m clj-kondo.lsp.impl.version
 lein uberjar
-cp target/clj-kondo.lsp-0.0.1-SNAPSHOT-standalone.jar ../vscode-extension/clj-kondo.lsp-standalone.jar
+cp target/clj-kondo.lsp-*-standalone.jar ../vscode-extension/clj-kondo.lsp-standalone.jar
