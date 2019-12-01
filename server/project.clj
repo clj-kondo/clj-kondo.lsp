@@ -1,4 +1,4 @@
-(defproject clj-kondo.lsp "0.1.0"
+(defproject clj-kondo/lsp-server "0.1.0"
   :description "Language server for clj-kondo."
   :url "https://github.com/borkdude/clj-kondo.lsp"
   :license {:name "EPL-1.0"
