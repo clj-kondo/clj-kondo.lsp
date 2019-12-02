@@ -1,4 +1,4 @@
-(ns clj-kondo.lsp.impl.version
+(ns clj-kondo.lsp-server.impl.version
   {:no-doc true}
   (:require [clojure.java.io :as io]
             [clojure.string :as str])

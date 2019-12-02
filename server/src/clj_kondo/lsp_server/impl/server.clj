@@ -1,4 +1,4 @@
-(ns clj-kondo.lsp.impl.server
+(ns clj-kondo.lsp-server.impl.server
   {:no-doc true}
   (:import [org.eclipse.lsp4j.services LanguageServer TextDocumentService WorkspaceService LanguageClient]
            [org.eclipse.lsp4j

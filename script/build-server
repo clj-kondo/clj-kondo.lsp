@@ -3,6 +3,11 @@
 java -version
 script/update-project.clj
 cd server
-lein run -m clj-kondo.lsp.impl.version
+lein run -m clj-kondo.lsp-server.impl.version
 lein uberjar
-cp target/clj-kondo.lsp-*-standalone.jar ../vscode-extension/clj-kondo.lsp-standalone.jar
+cd target
+for filename in *standalone.jar;
+do cp "$filename" "clj-kondo-$filename";
+done
+cd ..
+cp target/lsp-*-standalone.jar ../vscode-extension/clj-kondo.lsp-standalone.jar

@@ -1,8 +1,8 @@
-(ns clj-kondo.lsp.main
+(ns clj-kondo.lsp-server.main
   {:no-doc true}
   (:gen-class)
   (:require
-   [clj-kondo.lsp.impl.server :as server]))
+   [clj-kondo.lsp-server.impl.server :as server]))
 
 (set! *warn-on-reflection* true)
 

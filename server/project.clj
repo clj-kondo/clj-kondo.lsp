@@ -12,7 +12,7 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clj-kondo "2019.11.23"]
                  [org.eclipse.lsp4j/org.eclipse.lsp4j "0.8.1"]]
-  :main clj-kondo.lsp.main
+  :main clj-kondo.lsp-server.main
   :aot :all
   :profiles {:uberjar {:aot :all
                        :global-vars {*assert* false}
