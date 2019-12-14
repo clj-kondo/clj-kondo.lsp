@@ -2,7 +2,7 @@
 ;; To change dependencies, update deps.edn and run script/update-project.clj.
 ;; To change other things, edit project.template.clj and run script/update-project.clj.
 
-(defproject clj-kondo/lsp-server "2019.12.14-2"
+(defproject clj-kondo/lsp-server "2019.12.14"
   :description "Language server for clj-kondo."
   :url "https://github.com/borkdude/clj-kondo.lsp"
   :scm {:name "git"

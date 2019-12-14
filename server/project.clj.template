@@ -1,4 +1,4 @@
-(defproject clj-kondo/lsp-server "{{version}}-2"
+(defproject clj-kondo/lsp-server "{{version}}"
   :description "Language server for clj-kondo."
   :url "https://github.com/borkdude/clj-kondo.lsp"
   :scm {:name "git"
