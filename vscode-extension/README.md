@@ -12,6 +12,11 @@ For more information about clj-kondo itself, go [here](https://github.com/borkdu
 
 ## Changes
 
+### 2019.12.14
+
+- Bump clj-kondo to 2019.12.14. From this version on the plugin will maintain
+  the same versioning as the bundled clj-kondo version.
+
 ### 0.0.11
 
 - Undo unintended change to column of diagnostic location
