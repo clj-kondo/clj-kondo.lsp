@@ -65,11 +65,19 @@
                 err# (str pw#)]
             (error err#)))))
 
-(defn finding->Diagnostic [{:keys [:row :col :end-row :end-col :message :level]}]
+(defn finding->Diagnostic [lines {:keys [:row :col :end-row :end-col :message :level]}]
   (let [row (max 0 (dec row))
         col (max 0 (dec col))
-        end-row (max 0 (dec end-row))
-        end-col (max 0 (dec end-col))]
+        start-char (when-let [^String line (nth lines row)]
+                     (try (.charAt line col)
+                          (catch StringIndexOutOfBoundsException _ nil)))
+        expression? (identical? \( start-char)
+        end-row (cond expression? row
+                      end-row (max 0 (dec end-row))
+                      :else row)
+        end-col (cond expression? (inc col)
+                      end-col (max 0 (dec end-col))
+                      :else col)]
     (Diagnostic. (Range. (Position. row col)
                          (Position. end-row end-col))
                  message
@@ -90,11 +98,12 @@
 (defn lint! [text uri]
   (let [lang (uri->lang uri)
         {:keys [:findings]} (with-in-str text (clj-kondo/run! {:lint ["-"]
-                                                               :lang lang}))]
+                                                               :lang lang}))
+        lines (str/split text #"\r?\n")]
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
                           uri
-                          (map finding->Diagnostic findings)))))
+                          (map #(finding->Diagnostic lines %) findings)))))
 
 (deftype LSPTextDocumentService []
   TextDocumentService
