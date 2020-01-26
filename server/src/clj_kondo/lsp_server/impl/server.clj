@@ -65,12 +65,13 @@
                 err# (str pw#)]
             (error err#)))))
 
-(defn finding->Diagnostic [{:keys [:row :col :message :level]}]
+(defn finding->Diagnostic [{:keys [:row :col :end-row :end-col :message :level]}]
   (let [row (max 0 (dec row))
-        ;; col (max 0 (dec col))
-        ]
+        col (max 0 (dec col))
+        end-row (max 0 (dec end-row))
+        end-col (max 0 (dec end-col))]
     (Diagnostic. (Range. (Position. row col)
-                         (Position. row col))
+                         (Position. end-row end-col))
                  message
                  (case level
                    :info DiagnosticSeverity/Information
