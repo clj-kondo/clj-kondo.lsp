@@ -1,4 +1,4 @@
-#!/usr/bin/env clojure -Sdeps {:deps,{selmer,{:mvn/version,"1.12.17"},clj-kondo,{:mvn/version,"2020.03.20"}}}
+#!/usr/bin/env clojure -Sdeps {:deps,{selmer,{:mvn/version,"1.12.17"},clj-kondo,{:mvn/version,"2020.04.05"}}}
 
 (require '[selmer.parser :as p])
 (require '[clojure.java.io :as io])
