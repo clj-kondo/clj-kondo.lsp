@@ -27,7 +27,8 @@
            [org.eclipse.lsp4j.launch LSPLauncher]
            [java.util.concurrent CompletableFuture])
   (:require [clojure.string :as str]
-            [clj-kondo.core :as clj-kondo]))
+            [clj-kondo.core :as clj-kondo]
+            [clojure.java.io :as io]))
 
 (set! *warn-on-reflection* true)
 
@@ -95,10 +96,32 @@
         lang
         :clj))))
 
+(defn config-dir
+  ([^java.io.File start-dir]
+   (loop [dir start-dir]
+     (let [cfg-dir (io/file dir ".clj-kondo")]
+       (if (.exists cfg-dir)
+         (if (.isDirectory cfg-dir)
+           cfg-dir
+           (throw (Exception. (str cfg-dir " must be a directory"))))
+         (when-let [parent (.getParentFile dir)]
+           (recur parent)))))))
+
+(defn uri->config-dir [uri]
+  (let [dir (-> (java.net.URI. uri)
+                (.getPath)
+                (io/file)
+                (.getParentFile))]
+    (config-dir dir)))
+
 (defn lint! [text uri]
   (let [lang (uri->lang uri)
-        {:keys [:findings]} (with-in-str text (clj-kondo/run! {:lint ["-"]
-                                                               :lang lang}))
+        cfg-dir (uri->config-dir uri)
+        {:keys [:findings]} (with-in-str text
+                              (clj-kondo/run! (cond->
+                                                  {:lint ["-"]
+                                                   :lang lang}
+                                                cfg-dir (assoc :config-dir cfg-dir))))
         lines (str/split text #"\r?\n")]
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
