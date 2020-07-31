@@ -8,8 +8,8 @@
 
 ;;;; parse command line options
 
-(defn -main [& options]
-  (server/run-server! options))
+(defn -main [& args]
+  (server/run-server! args))
 
 ;;;; Scratch
 

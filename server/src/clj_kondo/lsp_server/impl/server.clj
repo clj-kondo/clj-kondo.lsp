@@ -33,7 +33,7 @@
 (set! *warn-on-reflection* true)
 
 (defonce proxy-state (atom nil))
-(def options (atom nil))
+(def arg-options (atom nil))
 
 (defn log! [level & msg]
   (when-let [client @proxy-state]
@@ -115,7 +115,12 @@
                 (.getParentFile))]
     (config-dir dir)))
 
+(defn config-options
+  [args path]
+  (str/join "/" (concat [path] [(first args)])))
+
 (defn lint! [text uri]
+  
   (let [lang (uri->lang uri)
         ^java.io.File cfg-dir (uri->config-dir uri)
         {:keys [:findings]} (with-in-str text
@@ -123,7 +128,7 @@
                                                   {:lint ["-"]
                                                    :lang lang}
                                                 cfg-dir (assoc :config-dir cfg-dir)
-                                                cfg-dir (assoc :config (str/join "/" (concat [(.getPath cfg-dir)] [@options]))))))
+                                                cfg-dir (assoc :config (config-options @arg-options (.getPath cfg-dir))))))
         lines (str/split text #"\r?\n")]
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
@@ -181,8 +186,7 @@
       (LSPWorkspaceService.))))
 
 (defn run-server! [args]
-  (reset! options args)
-  (swap! options first)
+  (reset! arg-options args)
   (let [launcher (LSPLauncher/createServerLauncher server System/in System/out)
         proxy ^LanguageClient (.getRemoteProxy launcher)]
     (reset! proxy-state proxy)
