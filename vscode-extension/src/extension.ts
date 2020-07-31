@@ -41,10 +41,11 @@ export function activate(context: ExtensionContext) {
     // The debug options for the server
     // --inspect=6009: runs the server in Node's Inspector mode so VS Code can attach to the server for debugging
     let debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+    let configPath: string = workspace.getConfiguration().get('clj-kondo.config.filePath');
     let jarPath = path.join(context.extensionPath, 'clj-kondo.lsp-standalone.jar');
     let serverOptions: ServerOptions = {
-        run: {command: 'java', args:['-jar', jarPath] },
-        debug: {command: 'java', args:['-jar', jarPath]},
+        run: {command: 'java', args:['-jar', jarPath, configPath] },
+        debug: {command: 'java', args:['-jar', jarPath, configPath]},
     }
 
     // If the extension is launched in debug mode then the debug server options are used

@@ -33,6 +33,7 @@
 (set! *warn-on-reflection* true)
 
 (defonce proxy-state (atom nil))
+(def options (atom nil))
 
 (defn log! [level & msg]
   (when-let [client @proxy-state]
@@ -116,12 +117,13 @@
 
 (defn lint! [text uri]
   (let [lang (uri->lang uri)
-        cfg-dir (uri->config-dir uri)
+        ^java.io.File cfg-dir (uri->config-dir uri)
         {:keys [:findings]} (with-in-str text
                               (clj-kondo/run! (cond->
                                                   {:lint ["-"]
                                                    :lang lang}
-                                                cfg-dir (assoc :config-dir cfg-dir))))
+                                                cfg-dir (assoc :config-dir cfg-dir)
+                                                cfg-dir (assoc :config (str/join "/" (concat [(.getPath cfg-dir)] [@options]))))))
         lines (str/split text #"\r?\n")]
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
@@ -178,7 +180,9 @@
     (getWorkspaceService []
       (LSPWorkspaceService.))))
 
-(defn run-server! []
+(defn run-server! [args]
+  (reset! options args)
+  (swap! options first)
   (let [launcher (LSPLauncher/createServerLauncher server System/in System/out)
         proxy ^LanguageClient (.getRemoteProxy launcher)]
     (reset! proxy-state proxy)

@@ -33,5 +33,17 @@
     "tslint": "^5.16.0",
     "typescript": "^3.6.4",
     "vscode": "^1.1.35"
+  },
+  "contributes": {
+    "configuration": {
+      "title": "clj-kondo",
+      "properties": {
+        "clj-kondo.config.filePath": {
+          "type": "string",
+          "scope": "application",
+          "markdownDescription": "Specifies file argument or EDN arguement to merge with config.edn."
+        }
+      }
+    }
   }
 }

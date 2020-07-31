@@ -9,7 +9,7 @@
 ;;;; parse command line options
 
 (defn -main [& options]
-  (server/run-server!))
+  (server/run-server! options))
 
 ;;;; Scratch
 
