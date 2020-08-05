@@ -38,7 +38,7 @@
     "configuration": {
       "title": "clj-kondo",
       "properties": {
-        "clj-kondo.config.configArgs": {
+        "clj-kondo.config": {
           "type": "string",
           "scope": "application",
           "markdownDescription": "Specifies config options to pass to clj-kondo on lint. If specifying a path for an additional edn file, do not include .clj-kondo, that will be included automatically."

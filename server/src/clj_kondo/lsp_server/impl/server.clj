@@ -28,6 +28,7 @@
            [java.util.concurrent CompletableFuture])
   (:require [clojure.string :as str]
             [clj-kondo.core :as clj-kondo]
+            [clojure.edn :as edn]
             [clojure.java.io :as io]))
 
 (set! *warn-on-reflection* true)
@@ -116,11 +117,16 @@
     (config-dir dir)))
 
 (defn config-options
-  [args path]
-  (str/join "/" (concat [path] [(first args)])))
+  [arg ^java.io.File config-dir]
+  (let [file (io/file arg)]
+       (if (.isFile file)
+         (if (.isRelative file)
+           (io/file config-dir arg)
+           (file))
+         (edn/read-string arg))))
 
 (defn lint! [text uri]
-  
+  ()
   (let [lang (uri->lang uri)
         ^java.io.File cfg-dir (uri->config-dir uri)
         {:keys [:findings]} (with-in-str text
@@ -128,7 +134,7 @@
                                                   {:lint ["-"]
                                                    :lang lang}
                                                 cfg-dir (assoc :config-dir cfg-dir)
-                                                cfg-dir (assoc :config (config-options @arg-options (.getPath cfg-dir))))))
+                                                cfg-dir (assoc :config (config-options @arg-options cfg-dir)))))
         lines (str/split text #"\r?\n")]
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
