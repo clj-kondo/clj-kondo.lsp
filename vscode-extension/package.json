@@ -1,9 +1,9 @@
 {
   "name": "clj-kondo",
-  "description": "Clj-kondo language server and client bundled in one extension.",
+  "description": "Clj-kondo, a linter for Clojure that sparks joy.",
   "author": "Michiel Borkent",
   "license": "EPL-1",
-  "version": "2020.7.29",
+  "version": "2020.7.290",
   "publisher": "borkdude",
   "repository": {
     "type": "git",
