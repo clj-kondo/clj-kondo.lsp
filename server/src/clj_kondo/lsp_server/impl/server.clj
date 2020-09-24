@@ -54,8 +54,11 @@
 (defn info [& msgs]
   (apply log! :info msgs))
 
+(def debug? true)
+
 (defn debug [& msgs]
-  (apply log! :debug msgs))
+  (when debug?
+    (apply log! :debug msgs)))
 
 (defmacro do! [& body]
   `(try ~@body
@@ -111,8 +114,10 @@
   (let [dir (-> (java.net.URI. uri)
                 (.getPath)
                 (io/file)
-                (.getParentFile))]
-    (config-dir dir)))
+                (.getParentFile))
+        dir (config-dir dir)]
+    (debug "found config dir at" dir)
+    dir))
 
 (defn lint! [text uri]
   (let [lang (uri->lang uri)
@@ -122,11 +127,13 @@
                                                   {:lint ["-"]
                                                    :lang lang}
                                                 cfg-dir (assoc :config-dir cfg-dir))))
-        lines (str/split text #"\r?\n")]
+        lines (str/split text #"\r?\n")
+        diagnostics (mapv #(finding->Diagnostic lines %) findings)]
+    (debug "publishing diagnostics")
     (.publishDiagnostics ^LanguageClient @proxy-state
                          (PublishDiagnosticsParams.
                           uri
-                          (map #(finding->Diagnostic lines %) findings)))))
+                          diagnostics))))
 
 (deftype LSPTextDocumentService []
   TextDocumentService
@@ -134,6 +141,7 @@
    (do! (let [td (.getTextDocument params)
               text (.getText td)
               uri (.getUri td)]
+          (debug "opened file, linting:" uri)
           (lint! text uri))))
 
   (^void didChange [_ ^DidChangeTextDocumentParams params]
@@ -142,6 +150,7 @@
               change (first changes)
               text (.getText ^TextDocumentContentChangeEvent change)
               uri (.getUri td)]
+          (debug "changed file, linting:" uri)
           (lint! text uri))))
 
   (^void didSave [_ ^DidSaveTextDocumentParams _params])
@@ -169,7 +178,9 @@
      (CompletableFuture/completedFuture 0))
 
     (^void exit []
+     (debug "trying to exit clj-kondo")
      (shutdown-agents)
+     (debug "agents down, exiting with status zero")
      (System/exit 0))
 
     (getTextDocumentService []
@@ -182,4 +193,5 @@
   (let [launcher (LSPLauncher/createServerLauncher server System/in System/out)
         proxy ^LanguageClient (.getRemoteProxy launcher)]
     (reset! proxy-state proxy)
-    (.startListening launcher)))
+    (.startListening launcher)
+    (debug "started")))
