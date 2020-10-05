@@ -63,11 +63,11 @@
 (defmacro do! [& body]
   `(try ~@body
         (catch Throwable e#
-          (let [sw# (java.io.StringWriter.)
-                pw# (java.io.PrintWriter. sw#)
-                _# (.printStackTrace e# pw#)
-                err# (str pw#)]
-            (error err#)))))
+          (with-open [sw# (java.io.StringWriter.)
+                      pw# (java.io.PrintWriter. sw#)]
+            (let [_# (.printStackTrace e# pw#)
+                  err# (str sw#)]
+              (error err#))))))
 
 (defn finding->Diagnostic [lines {:keys [:row :col :end-row :end-col :message :level]}]
   (let [row (max 0 (dec row))
