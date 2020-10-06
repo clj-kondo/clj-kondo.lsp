@@ -116,24 +116,25 @@
                 (io/file)
                 (.getParentFile))
         dir (config-dir dir)]
-    (debug "found config dir at" dir)
+    (when dir (debug "found config dir at" dir))
     dir))
 
 (defn lint! [text uri]
-  (let [lang (uri->lang uri)
-        cfg-dir (uri->config-dir uri)
-        {:keys [:findings]} (with-in-str text
-                              (clj-kondo/run! (cond->
-                                                  {:lint ["-"]
-                                                   :lang lang}
-                                                cfg-dir (assoc :config-dir cfg-dir))))
-        lines (str/split text #"\r?\n")
-        diagnostics (mapv #(finding->Diagnostic lines %) findings)]
-    (debug "publishing diagnostics")
-    (.publishDiagnostics ^LanguageClient @proxy-state
-                         (PublishDiagnosticsParams.
-                          uri
-                          diagnostics))))
+  (when-not (str/ends-with? uri ".calva/output-window/output.calva-repl")
+    (let [lang (uri->lang uri)
+          cfg-dir (uri->config-dir uri)
+          {:keys [:findings]} (with-in-str text
+                                (clj-kondo/run! (cond->
+                                                    {:lint ["-"]
+                                                     :lang lang}
+                                                  cfg-dir (assoc :config-dir cfg-dir))))
+          lines (str/split text #"\r?\n")
+          diagnostics (mapv #(finding->Diagnostic lines %) findings)]
+      (debug "publishing diagnostics")
+      (.publishDiagnostics ^LanguageClient @proxy-state
+                           (PublishDiagnosticsParams.
+                            uri
+                            diagnostics)))))
 
 (deftype LSPTextDocumentService []
   TextDocumentService
