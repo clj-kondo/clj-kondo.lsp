@@ -1,6 +1,6 @@
 (ns clj-kondo.lsp-server.impl.server
   {:no-doc true}
-  (:import [org.eclipse.lsp4j.services LanguageServer TextDocumentService WorkspaceService LanguageClient]
+  (:import [java.util.concurrent CompletableFuture]
            [org.eclipse.lsp4j
             Diagnostic
             DiagnosticSeverity
@@ -25,10 +25,10 @@
             TextDocumentSyncKind
             TextDocumentSyncOptions]
            [org.eclipse.lsp4j.launch LSPLauncher]
-           [java.util.concurrent CompletableFuture])
-  (:require [clojure.string :as str]
-            [clj-kondo.core :as clj-kondo]
-            [clojure.java.io :as io]))
+           [org.eclipse.lsp4j.services LanguageServer TextDocumentService WorkspaceService LanguageClient])
+  (:require [clj-kondo.core :as clj-kondo]
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (set! *warn-on-reflection* true)
 
@@ -54,7 +54,7 @@
 (defn info [& msgs]
   (apply log! :info msgs))
 
-(def debug? true)
+(def debug? false)
 
 (defn debug [& msgs]
   (when debug?
