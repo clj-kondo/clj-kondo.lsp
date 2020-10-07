@@ -1,6 +1,6 @@
 (ns clj-kondo.lsp-server.impl.server
   {:no-doc true}
-  (:import [org.eclipse.lsp4j.services LanguageServer TextDocumentService WorkspaceService LanguageClient]
+  (:import [java.util.concurrent CompletableFuture]
            [org.eclipse.lsp4j
             Diagnostic
             DiagnosticSeverity
@@ -25,10 +25,10 @@
             TextDocumentSyncKind
             TextDocumentSyncOptions]
            [org.eclipse.lsp4j.launch LSPLauncher]
-           [java.util.concurrent CompletableFuture])
-  (:require [clojure.string :as str]
-            [clj-kondo.core :as clj-kondo]
-            [clojure.java.io :as io]))
+           [org.eclipse.lsp4j.services LanguageServer TextDocumentService WorkspaceService LanguageClient])
+  (:require [clj-kondo.core :as clj-kondo]
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (set! *warn-on-reflection* true)
 
@@ -54,17 +54,20 @@
 (defn info [& msgs]
   (apply log! :info msgs))
 
+(def debug? false)
+
 (defn debug [& msgs]
-  (apply log! :debug msgs))
+  (when debug?
+    (apply log! :debug msgs)))
 
 (defmacro do! [& body]
   `(try ~@body
         (catch Throwable e#
-          (let [sw# (java.io.StringWriter.)
-                pw# (java.io.PrintWriter. sw#)
-                _# (.printStackTrace e# pw#)
-                err# (str pw#)]
-            (error err#)))))
+          (with-open [sw# (java.io.StringWriter.)
+                      pw# (java.io.PrintWriter. sw#)]
+            (let [_# (.printStackTrace e# pw#)
+                  err# (str sw#)]
+              (error err#))))))
 
 (defn finding->Diagnostic [lines {:keys [:row :col :end-row :end-col :message :level]}]
   (let [row (max 0 (dec row))
@@ -111,22 +114,27 @@
   (let [dir (-> (java.net.URI. uri)
                 (.getPath)
                 (io/file)
-                (.getParentFile))]
-    (config-dir dir)))
+                (.getParentFile))
+        dir (config-dir dir)]
+    (when dir (debug "found config dir at" dir))
+    dir))
 
 (defn lint! [text uri]
-  (let [lang (uri->lang uri)
-        cfg-dir (uri->config-dir uri)
-        {:keys [:findings]} (with-in-str text
-                              (clj-kondo/run! (cond->
-                                                  {:lint ["-"]
-                                                   :lang lang}
-                                                cfg-dir (assoc :config-dir cfg-dir))))
-        lines (str/split text #"\r?\n")]
-    (.publishDiagnostics ^LanguageClient @proxy-state
-                         (PublishDiagnosticsParams.
-                          uri
-                          (map #(finding->Diagnostic lines %) findings)))))
+  (when-not (str/ends-with? uri ".calva/output-window/output.calva-repl")
+    (let [lang (uri->lang uri)
+          cfg-dir (uri->config-dir uri)
+          {:keys [:findings]} (with-in-str text
+                                (clj-kondo/run! (cond->
+                                                    {:lint ["-"]
+                                                     :lang lang}
+                                                  cfg-dir (assoc :config-dir cfg-dir))))
+          lines (str/split text #"\r?\n")
+          diagnostics (mapv #(finding->Diagnostic lines %) findings)]
+      (debug "publishing diagnostics")
+      (.publishDiagnostics ^LanguageClient @proxy-state
+                           (PublishDiagnosticsParams.
+                            uri
+                            diagnostics)))))
 
 (deftype LSPTextDocumentService []
   TextDocumentService
@@ -134,6 +142,7 @@
    (do! (let [td (.getTextDocument params)
               text (.getText td)
               uri (.getUri td)]
+          (debug "opened file, linting:" uri)
           (lint! text uri))))
 
   (^void didChange [_ ^DidChangeTextDocumentParams params]
@@ -142,6 +151,7 @@
               change (first changes)
               text (.getText ^TextDocumentContentChangeEvent change)
               uri (.getUri td)]
+          (debug "changed file, linting:" uri)
           (lint! text uri))))
 
   (^void didSave [_ ^DidSaveTextDocumentParams _params])
@@ -169,7 +179,9 @@
      (CompletableFuture/completedFuture 0))
 
     (^void exit []
+     (debug "trying to exit clj-kondo")
      (shutdown-agents)
+     (debug "agents down, exiting with status zero")
      (System/exit 0))
 
     (getTextDocumentService []
@@ -182,4 +194,5 @@
   (let [launcher (LSPLauncher/createServerLauncher server System/in System/out)
         proxy ^LanguageClient (.getRemoteProxy launcher)]
     (reset! proxy-state proxy)
-    (.startListening launcher)))
+    (.startListening launcher)
+    (debug "started")))
