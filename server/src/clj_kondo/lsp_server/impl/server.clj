@@ -72,7 +72,10 @@
 (defn finding->Diagnostic [lines {:keys [:row :col :end-row :end-col :message :level]}]
   (let [row (max 0 (dec row))
         col (max 0 (dec col))
-        start-char (when-let [^String line (nth lines row)]
+        start-char (when-let [^String line
+                              ;; don't use nth as to prevent index out of bounds
+                              ;; exception, see #11
+                              (get lines row)]
                      (try (.charAt line col)
                           (catch StringIndexOutOfBoundsException _ nil)))
         expression? (identical? \( start-char)
