@@ -113,9 +113,8 @@
          (when-let [parent (.getParentFile dir)]
            (recur parent)))))))
 
-(defn uri->config-dir [uri]
-  (let [dir (-> (java.net.URI. uri)
-                (.getPath)
+(defn path->config-dir [path]
+  (let [dir (-> path
                 (io/file)
                 (.getParentFile))
         dir (config-dir dir)]
@@ -125,11 +124,14 @@
 (defn lint! [text uri]
   (when-not (str/ends-with? uri ".calva/output-window/output.calva-repl")
     (let [lang (uri->lang uri)
-          cfg-dir (uri->config-dir uri)
+          path (-> (java.net.URI. uri)
+                   (.getPath))
+          cfg-dir (path->config-dir path)
           {:keys [:findings]} (with-in-str text
                                 (clj-kondo/run! (cond->
                                                     {:lint ["-"]
-                                                     :lang lang}
+                                                     :lang lang
+                                                     :filename path}
                                                   cfg-dir (assoc :config-dir cfg-dir))))
           lines (str/split text #"\r?\n")
           diagnostics (mapv #(finding->Diagnostic lines %) findings)]
