@@ -70,29 +70,30 @@
               (error err#))))))
 
 (defn finding->Diagnostic [lines {:keys [:row :col :end-row :end-col :message :level]}]
-  (let [row (max 0 (dec row))
-        col (max 0 (dec col))
-        start-char (when-let [^String line
-                              ;; don't use nth as to prevent index out of bounds
-                              ;; exception, see #11
-                              (get lines row)]
-                     (try (.charAt line col)
-                          (catch StringIndexOutOfBoundsException _ nil)))
-        expression? (identical? \( start-char)
-        end-row (cond expression? row
-                      end-row (max 0 (dec end-row))
-                      :else row)
-        end-col (cond expression? (inc col)
-                      end-col (max 0 (dec end-col))
-                      :else col)]
-    (Diagnostic. (Range. (Position. row col)
-                         (Position. end-row end-col))
-                 message
-                 (case level
-                   :info DiagnosticSeverity/Information
-                   :warning DiagnosticSeverity/Warning
-                   :error DiagnosticSeverity/Error)
-                 "clj-kondo")))
+  (when (and row col)
+    (let [row (max 0 (dec row))
+          col (max 0 (dec col))
+          start-char (when-let [^String line
+                                ;; don't use nth as to prevent index out of bounds
+                                ;; exception, see #11
+                                (get lines row)]
+                       (try (.charAt line col)
+                            (catch StringIndexOutOfBoundsException _ nil)))
+          expression? (identical? \( start-char)
+          end-row (cond expression? row
+                        end-row (max 0 (dec end-row))
+                        :else row)
+          end-col (cond expression? (inc col)
+                        end-col (max 0 (dec end-col))
+                        :else col)]
+      (Diagnostic. (Range. (Position. row col)
+                           (Position. end-row end-col))
+                   message
+                   (case level
+                     :info DiagnosticSeverity/Information
+                     :warning DiagnosticSeverity/Warning
+                     :error DiagnosticSeverity/Error)
+                   "clj-kondo"))))
 
 (defn uri->lang [uri]
   (when-let [dot-idx (str/last-index-of uri ".")]
@@ -134,7 +135,7 @@
                                                      :filename path}
                                                   cfg-dir (assoc :config-dir cfg-dir))))
           lines (str/split text #"\r?\n")
-          diagnostics (mapv #(finding->Diagnostic lines %) findings)]
+          diagnostics (vec (keep #(finding->Diagnostic lines %) findings))]
       (debug "publishing diagnostics")
       (.publishDiagnostics ^LanguageClient @proxy-state
                            (PublishDiagnosticsParams.
