@@ -4,7 +4,7 @@
             [clojure.string :as str])
   (:gen-class))
 
-(defn -main [& args]
+(defn -main [& _args]
   (let [version (str/trim (slurp (io/resource "CLJ_KONDO_VERSION")))
         out-file (io/file ".." "vscode-extension" "CLJ_KONDO_VERSION")]
     (println "Generation version file:" version ">" (.getPath out-file))
