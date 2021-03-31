@@ -1,6 +1,6 @@
 #!/bin/sh
 #_(
-"exec" "clojure" "-Sdeps" "{:deps,{selmer,{:mvn/version,\"1.12.17\"},clj-kondo,{:mvn/version,\"2021.03.22\"}}}" "$0"
+"exec" "clojure" "-Sdeps" "{:deps,{selmer,{:mvn/version,\"1.12.17\"},clj-kondo,{:mvn/version,\"2021.03.31\"}}}" "$0"
    )
 
 (require '[selmer.parser :as p])
