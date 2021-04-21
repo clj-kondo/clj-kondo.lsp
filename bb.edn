@@ -6,11 +6,9 @@
  :tasks {:requires ([babashka.fs :as fs])
          recent-clj-kondo {:requires ([babashka.curl :as curl]
                                       [cheshire.core :as cheshire])
-                           :task (-> (curl/get "https://api.github.com/repos/clj-kondo/clj-kondo/releases")
+                           :task (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
                                      :body (cheshire/parse-string true)
-                                     first
-                                     :tag_name
-                                     (subs 1))}
+                                     :latest_release)}
          update-project-clj {:depends [recent-clj-kondo]
                              :task (binding [*command-line-args* [recent-clj-kondo]]
                                      (load-file "script/update-project.clj"))}
