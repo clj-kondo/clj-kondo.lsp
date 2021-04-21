@@ -1,0 +1,33 @@
+{:paths ["script"]
+ :deps {borkdude/gh-release-artifact
+        #_{:local/root "../gh-release-artifact"}
+        {:git/url "https://github.com/borkdude/gh-release-artifact"
+         :sha "2f8898d84126a4e922c490f8614211a8b0cf67cd"}}
+ :tasks {recent-clj-kondo {:requires ([babashka.curl :as curl]
+                                      [cheshire.core :as cheshire])
+                           :task (-> (curl/get "https://api.github.com/repos/clj-kondo/clj-kondo/releases")
+                                     :body (cheshire/parse-string true)
+                                     first
+                                     :tag_name
+                                     (subs 1))}
+         update-project-clj {:depends [recent-clj-kondo]
+                             :task (binding [*command-line-args* [recent-clj-kondo]]
+                                     (load-file "script/update-project.clj"))}
+         java1.8 {:requires ([clojure.java.shell :refer [sh]]
+                             [clojure.string :as str])
+                  :task (let [java-version (:err (sh "java" "-version"))]
+                          (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
+         build-server
+         {:depends [java1.8 update-project-clj]
+          :task (do (shell {:dir "server"}
+                           "lein with-profiles -user do clean, run -m clj-kondo.lsp-server.impl.version")
+                    (shell {:dir "server"}
+                           "lein with-profiles -user do clean, uberjar"))}
+         lsp-jar {:depends [java1.8 build-server]
+                  :requires ([babashka.fs :as fs])
+                  :task (let [jar (first (fs/glob "server/target" "*standalone.jar"))
+                              lsp-jar (fs/path (fs/parent jar) (str "clj-kondo-" (fs/file-name jar)) )]
+                          (fs/copy jar lsp-jar))}
+         upload-jar {:depends [recent-clj-kondo lsp-jar]
+                     :requires ([clj-kondo-lsp.release-artifact :as ghr])
+                     :task (ghr/release recent-clj-kondo lsp-jar)}}}

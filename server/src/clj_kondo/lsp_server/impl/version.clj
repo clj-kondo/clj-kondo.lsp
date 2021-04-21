@@ -1,8 +1,7 @@
 (ns clj-kondo.lsp-server.impl.version
   {:no-doc true}
   (:require [clojure.java.io :as io]
-            [clojure.string :as str])
-  (:gen-class))
+            [clojure.string :as str]))
 
 (defn -main [& _args]
   (let [version (str/trim (slurp (io/resource "CLJ_KONDO_VERSION")))

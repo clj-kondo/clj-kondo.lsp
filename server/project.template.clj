@@ -8,8 +8,10 @@
   :dependencies [[org.clojure/clojure "1.10.1"]
                  [clj-kondo "{{version}}"]
                  [org.eclipse.lsp4j/org.eclipse.lsp4j "0.8.1"]]
+  ;; Oldest version JVM to support.
+  ;; We don't compile Java classes in this project, but adding this just in case.
+  :javac-options ["--release" "8"]
   :main clj-kondo.lsp-server.main
-  :aot :all
   :profiles {:uberjar {:aot :all
                        :global-vars {*assert* false}
                        :jvm-opts ["-Dclojure.compiler.direct-linking=true"
