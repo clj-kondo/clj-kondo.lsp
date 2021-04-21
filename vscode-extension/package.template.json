@@ -1,0 +1,36 @@
+{
+  "name": "clj-kondo",
+  "description": "Clj-kondo, a linter for Clojure that sparks joy.",
+  "author": "Michiel Borkent",
+  "license": "EPL-1",
+  "version": "{{version}}",
+  "publisher": "borkdude",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borkdude/clj-kondo.lsp"
+  },
+  "engines": {
+    "vscode": "^1.33.0"
+  },
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:clojure"
+  ],
+  "icon": "icon.png",
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -b",
+    "watch": "tsc -b -w",
+    "postinstall": ""
+  },
+  "dependencies": {
+    "vscode-languageclient": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/mocha": "^5.2.0",
+    "@types/node": "^8.0.0",
+    "tslint": "^5.16.0",
+    "typescript": "^3.6.4",
+    "vscode": "^1.1.35"
+  }
+}
