@@ -6,6 +6,7 @@
  :tasks {:requires ([babashka.fs :as fs])
          recent-clj-kondo {:requires ([babashka.curl :as curl]
                                       [cheshire.core :as cheshire])
+                           ;; see https://github.com/clojars/clojars-web/wiki/Data
                            :task (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
                                      :body (cheshire/parse-string true)
                                      :latest_release)}
