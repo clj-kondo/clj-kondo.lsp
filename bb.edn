@@ -24,7 +24,6 @@
                   :task (let [java-version (:err (sh "java" "-version"))]
                           (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
 
-
          -uberjar {:depends [recent-clj-kondo]
                    :task (str (fs/path "server/target" (str "lsp-server-"
                                                             recent-clj-kondo
