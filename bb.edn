@@ -4,14 +4,27 @@
         {:git/url "https://github.com/borkdude/gh-release-artifact"
          :sha "2f8898d84126a4e922c490f8614211a8b0cf67cd"}}
  :tasks {:requires ([babashka.fs :as fs])
-
+         :init (do (def tn (or (resolve 'babashka.tasks/*-task-name*)
+                               (resolve 'babashka.tasks/*task-name*)))
+                   (defn task-name []
+                     (deref tn))
+                   (defn eprn [& xs]
+                     (binding [*out* *err*]
+                       (apply prn xs)))
+                   )
+         :enter (prn :> (:name (current-task)))
+         :leave (prn :< (:name (current-task)))
          recent-clj-kondo {:doc "Detects most recent clj-kondo version from clojars"
                            :requires ([babashka.curl :as curl]
                                       [cheshire.core :as cheshire])
                            ;; see https://github.com/clojars/clojars-web/wiki/Data
-                           :task (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
-                                     :body (cheshire/parse-string true)
-                                     :latest_release)}
+                           :enter nil
+                           :leave nil
+                           :task (do
+                                   ;; (prn (current-task))
+                                   (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
+                                       :body (cheshire/parse-string true)
+                                       :latest_release))}
 
          update-project-clj {:doc "Updates project.clj with most recent clj-kondo version"
                              :depends [recent-clj-kondo]
@@ -22,12 +35,14 @@
                   :requires ([clojure.java.shell :refer [sh]]
                              [clojure.string :as str])
                   :task (let [java-version (:err (sh "java" "-version"))]
-                          (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
+                          #_(assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
 
-         -uberjar {:depends [recent-clj-kondo]
-                   :task (str (fs/path "server/target" (str "lsp-server-"
-                                                            recent-clj-kondo
-                                                            "-standalone.jar")))}
+         -uberjar {:depends [recent-clj-kondo update-project-clj]
+                   :task (do
+                           ;; (clojure.pprint/pprint (current-task))
+                           (str (fs/path "server/target" (str "lsp-server-"
+                                                              recent-clj-kondo
+                                                              "-standalone.jar"))))}
          build-server
          {:doc "Produces lsp server standalone jar"
           :depends [java1.8 update-project-clj -uberjar]
@@ -41,8 +56,11 @@
                :task (str "server/target/lsp-server-" recent-clj-kondo "-standalone.jar")}
 
          lsp-jar {:doc "Copies renamed jar for upload to clj-kondo repo"
+                  :enter (prn :> (:name (current-task)))
+                  :leave (prn :< (:name (current-task)))
                   :depends [java1.8 build-server -jar]
                   :task (let [lsp-jar (fs/path (fs/parent -jar) (str "clj-kondo-" (fs/file-name -jar)) )]
+                          ;; (clojure.pprint/pprint (current-task))
                           (fs/copy -jar lsp-jar {:replace-existing true}))}
 
          upload-jar {:doc "Uploads standalone lsp server jar to clj-kondo repo"
