@@ -4,7 +4,12 @@
         {:git/url "https://github.com/borkdude/gh-release-artifact"
          :sha "2f8898d84126a4e922c490f8614211a8b0cf67cd"}}
  :tasks {:requires ([babashka.fs :as fs])
-
+         :init (do (defn print-public-task [k]
+                     (let [{:keys [:private :name]} (current-task)]
+                       (when-not private
+                         (println (case k :enter "☐" "✓") name)))))
+         :enter (print-public-task :enter)
+         :leave (print-public-task :leave)
          recent-clj-kondo {:doc "Detects most recent clj-kondo version from clojars"
                            :requires ([babashka.curl :as curl]
                                       [cheshire.core :as cheshire])
@@ -22,9 +27,9 @@
                   :requires ([clojure.java.shell :refer [sh]]
                              [clojure.string :as str])
                   :task (let [java-version (:err (sh "java" "-version"))]
-                          (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
+                          #_(assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
 
-         -uberjar {:depends [recent-clj-kondo]
+         -uberjar {:depends [recent-clj-kondo update-project-clj]
                    :task (str (fs/path "server/target" (str "lsp-server-"
                                                             recent-clj-kondo
                                                             "-standalone.jar")))}
