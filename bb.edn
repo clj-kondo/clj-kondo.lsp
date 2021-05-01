@@ -31,7 +31,7 @@
           :requires ([clojure.java.shell :refer [sh]]
                      [clojure.string :as str])
           :task     (let [java-version (:err (sh "java" "-version"))]
-                      #_(assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
+                      (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
 
          -uberjar
          {:depends [recent-clj-kondo update-project-clj]
