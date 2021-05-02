@@ -3,90 +3,77 @@
          #_ {:local/root "../gh-release-artifact"}
          {:git/url "https://github.com/borkdude/gh-release-artifact"
           :sha     "2f8898d84126a4e922c490f8614211a8b0cf67cd"}}
- :tasks {:requires ([babashka.fs :as fs])
-         :init (do (defn print-public-task [k]
-                     (let [{:keys [:private :name]} (current-task)]
-                       (when-not private
-                         (println (case k :enter "☐" "✓") name)))))
-         :enter (print-public-task :enter)
-         :leave (print-public-task :leave)
+ :tasks {:requires           ([babashka.fs :as fs])
+         :init               (do (defn print-public-task [k]
+                                   (let [{:keys [:private :name]} (current-task)]
+                                     (when-not private
+                                       (println (case k :enter "☐" "✓") name)))))
+         :enter              (print-public-task :enter)
+         :leave              (print-public-task :leave)
 
-         recent-clj-kondo
-         {:doc      "Detects most recent clj-kondo version from clojars"
-          :requires ([babashka.curl :as curl]
-                     [cheshire.core :as cheshire])
-          ;; see https://github.com/clojars/clojars-web/wiki/Data
-          :task     (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
-                        :body (cheshire/parse-string true)
-                        :latest_release)}
+         recent-clj-kondo    {:doc      "Detects most recent clj-kondo version from clojars"
+                              :requires ([babashka.curl :as curl]
+                                         [cheshire.core :as cheshire])
+                              ;; see https://github.com/clojars/clojars-web/wiki/Data
+                              :task     (-> (curl/get "https://clojars.org/api/artifacts/clj-kondo/clj-kondo")
+                                            :body (cheshire/parse-string true)
+                                            :latest_release)}
 
-         update-project-clj
-         {:doc     "Updates project.clj with most recent clj-kondo version"
-          :depends [recent-clj-kondo]
-          :task    (binding [*command-line-args* [recent-clj-kondo]]
-                     (load-file "script/update-project.clj"))}
+         :update-project-clj {:doc     "Updates project.clj with most recent clj-kondo version"
+                              :depends [recent-clj-kondo]
+                              :task    (binding [*command-line-args* [recent-clj-kondo]]
+                                         (load-file "script/update-project.clj"))}
 
-         java1.8
-         {:doc      "Asserts that we are using java 1.8"
-          :requires ([clojure.java.shell :refer [sh]]
-                     [clojure.string :as str])
-          :task     (let [java-version (:err (sh "java" "-version"))]
-                      (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
+         java1.8             {:doc      "Asserts that we are using java 1.8"
+                              :requires ([clojure.java.shell :refer [sh]]
+                                         [clojure.string :as str])
+                              :task     (let [java-version (:err (sh "java" "-version"))]
+                                          (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
 
-         -uberjar
-         {:depends [recent-clj-kondo update-project-clj]
-          :task    (str (fs/path "server/target" (str "lsp-server-"
-                                                      recent-clj-kondo
-                                                      "-standalone.jar")))}
-         build-server
-         {:doc     "Produces lsp server standalone jar"
-          :depends [java1.8 update-project-clj -uberjar]
-          :task    (when (seq (fs/modified-since -uberjar ["server/project.clj" "server/src"]))
-                     (shell {:dir "server"}
-                            "lein with-profiles -user do clean, run -m clj-kondo.lsp-server.impl.version")
-                     (shell {:dir "server"}
-                            "lein with-profiles -user do clean, uberjar"))}
+         -uberjar            {:depends [recent-clj-kondo update-project-clj]
+                              :task    (str (fs/path "server/target" (str "lsp-server-"
+                                                                          recent-clj-kondo
+                                                                          "-standalone.jar")))}
+         build-server        {:doc     "Produces lsp server standalone jar"
+                              :depends [java1.8 update-project-clj -uberjar]
+                              :task    (when (seq (fs/modified-since -uberjar ["server/project.clj" "server/src"]))
+                                         (shell {:dir "server"}
+                                                "lein with-profiles -user do clean, run -m clj-kondo.lsp-server.impl.version")
+                                         (shell {:dir "server"}
+                                                "lein with-profiles -user do clean, uberjar"))}
 
-         -jar
-         {:depends [recent-clj-kondo]
-          :task    (str "server/target/lsp-server-" recent-clj-kondo "-standalone.jar")}
+         -jar                {:depends [recent-clj-kondo]
+                              :task    (str "server/target/lsp-server-" recent-clj-kondo "-standalone.jar")}
 
-         lsp-jar
-         {:doc     "Copies renamed jar for upload to clj-kondo repo"
-          :depends [java1.8 build-server -jar]
-          :task    (let [lsp-jar (fs/path (fs/parent -jar) (str "clj-kondo-" (fs/file-name -jar)))]
-                     (fs/copy -jar lsp-jar {:replace-existing true}))}
+         lsp-jar             {:doc     "Copies renamed jar for upload to clj-kondo repo"
+                              :depends [java1.8 build-server -jar]
+                              :task    (let [lsp-jar (fs/path (fs/parent -jar) (str "clj-kondo-" (fs/file-name -jar)))]
+                                         (fs/copy -jar lsp-jar {:replace-existing true}))}
 
-         upload-jar
-         {:doc      "Uploads standalone lsp server jar to clj-kondo repo"
-          :depends  [recent-clj-kondo lsp-jar]
-          :requires ([clj-kondo-lsp.release-artifact :as ghr])
-          :task     (ghr/release recent-clj-kondo lsp-jar)}
+         upload-jar          {:doc      "Uploads standalone lsp server jar to clj-kondo repo"
+                              :depends  [recent-clj-kondo lsp-jar]
+                              :requires ([clj-kondo-lsp.release-artifact :as ghr])
+                              :task     (ghr/release recent-clj-kondo lsp-jar)}
 
-         vscode-server
-         {:doc     "Copied lsp server jar to vscode extension"
-          :depends [lsp-jar]
-          :task    (fs/copy lsp-jar (fs/path "vscode-extension" "clj-kondo.lsp-standalone.jar")
-                            {:replace-existing true})}
+         vscode-server       {:doc     "Copied lsp server jar to vscode extension"
+                              :depends [lsp-jar]
+                              :task    (fs/copy lsp-jar (fs/path "vscode-extension" "clj-kondo.lsp-standalone.jar")
+                                                {:replace-existing true})}
 
-         vscode-version
-         {:doc     "Prepares package.json with up to date clj-kondo version"
-          :depends [recent-clj-kondo]
-          :task    (binding [*command-line-args* [recent-clj-kondo]]
-                     (load-file "script/update-package-json.clj"))}
+         vscode-version      {:doc     "Prepares package.json with up to date clj-kondo version"
+                              :depends [recent-clj-kondo]
+                              :task    (binding [*command-line-args* [recent-clj-kondo]]
+                                         (load-file "script/update-package-json.clj"))}
 
-         vscode-publish
-         {:doc     "Publishes vscode extension to marketplace"
-          :depends [vscode-server vscode-version]
-          :task    (shell {:dir "vscode-extension"} "vsce publish")}
+         vscode-publish      {:doc     "Publishes vscode extension to marketplace"
+                              :depends [vscode-server vscode-version]
+                              :task    (shell {:dir "vscode-extension"} "vsce publish")}
 
-         ovsx-publish
-         {:doc     "Publishes vscode extension to ovsx thing"
-          :depends [vscode-server vscode-version]
-          :task    (shell {:dir "vscode-extension"}
-                          (str "ovsx publish --pat "
-                               (System/getenv "OVSX_TOKEN")))}
+         ovsx-publish        {:doc     "Publishes vscode extension to ovsx thing"
+                              :depends [vscode-server vscode-version]
+                              :task    (shell {:dir "vscode-extension"}
+                                              (str "ovsx publish --pat "
+                                                   (System/getenv "OVSX_TOKEN")))}
 
-         publish
-         {:doc     "The mother of all tasks: publishes everything needed for new release"
-          :depends [upload-jar vscode-publish ovsx-publish]}}}
+         publish             {:doc     "The mother of all tasks: publishes everything needed for new release"
+                              :depends [upload-jar vscode-publish ovsx-publish]}}}
