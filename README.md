@@ -7,11 +7,13 @@ This repo contains the code for:
 
 ## Build
 
+Project automation is done using [babashka tasks](https://book.babashka.org/#tasks).
+
 ### Server
 
 To build the server, run this script:
 
-    script/build-server
+    bb vscode-server
 
 This will copy the uberjar to the vscode-extension directory.
 
@@ -30,6 +32,6 @@ extension. Edit a Clojure file (`.clj`) and you will get diagnostic feedback.
 
 ## License
 
-Copyright © 2019 Michiel Borkent
+Copyright © 2019-2022 Michiel Borkent
 
 Distributed under the EPL License, same as Clojure. See LICENSE.
