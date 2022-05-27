@@ -3,7 +3,7 @@
   "description": "Clj-kondo, a linter for Clojure that sparks joy.",
   "author": "Michiel Borkent",
   "license": "EPL-1",
-  "version": "2022.4.25",
+  "version": "2022.5.27",
   "publisher": "borkdude",
   "repository": {
     "type": "git",
