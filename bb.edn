@@ -2,7 +2,7 @@
  :deps  {borkdude/gh-release-artifact
          #_ {:local/root "../gh-release-artifact"}
          {:git/url "https://github.com/borkdude/gh-release-artifact"
-          :sha     "2f8898d84126a4e922c490f8614211a8b0cf67cd"}}
+          :git/sha "db5e79559fdbfa009ed4a0921079e20e1e76b269"}}
  :tasks {:requires          ([babashka.fs :as fs])
          :init              (do (defn print-public-task [k]
                                   (let [{:keys [:private :name]} (current-task)]

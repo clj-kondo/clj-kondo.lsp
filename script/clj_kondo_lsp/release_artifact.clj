@@ -25,6 +25,7 @@
           (ghr/overwrite-asset {:org "clj-kondo"
                                 :repo "clj-kondo"
                                 :file file
-                                :tag (str "v" clj-kondo-version)}))
+                                :tag (str "v" clj-kondo-version)
+                                :sha256 true}))
       (println "Skipping release artifact (no GITHUB_TOKEN or not on main branch)"))
     nil))
