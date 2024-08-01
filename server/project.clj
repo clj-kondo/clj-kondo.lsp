@@ -2,7 +2,7 @@
 ;; To change dependencies, update deps.edn and run script/update-project.clj.
 ;; To change other things, edit project.template.clj and run script/update-project.clj.
 
-(defproject clj-kondo/lsp-server "2024.05.24"
+(defproject clj-kondo/lsp-server "2024.08.01"
   :description "Language server for clj-kondo."
   :url "https://github.com/borkdude/clj-kondo.lsp"
   :scm {:name "git"
@@ -10,11 +10,10 @@
   :license {:name "EPL-1.0"
             :url "https://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [clj-kondo "2024.05.24"]
+                 [clj-kondo "2024.08.01"]
                  [org.eclipse.lsp4j/org.eclipse.lsp4j "0.8.1"]]
   ;; Oldest version JVM to support.
-  ;; We don't compile Java classes in this project, but adding this just in case.
-  :javac-options ["--release" "8"]
+  :javac-options ["--release" "8" "-9"]
   :main clj-kondo.lsp-server.main
   :profiles {:uberjar {:aot :all
                        :global-vars {*assert* false}
