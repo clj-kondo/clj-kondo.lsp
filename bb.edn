@@ -24,18 +24,12 @@
                              :task    (binding [*command-line-args* [recent-clj-kondo]]
                                         (load-file "script/update-project.clj"))}
 
-         java1.8            {:doc      "Asserts that we are using java 1.8"
-                             :requires ([clojure.java.shell :refer [sh]]
-                                        [clojure.string :as str])
-                             :task     (let [java-version (:err (sh "java" "-version"))]
-                                         (assert (str/includes? java-version "1.8.0") "Must use Java 1.8.0"))}
-
          -uberjar           {:depends [recent-clj-kondo update-project-clj]
                              :task    (str (fs/path "server/target" (str "lsp-server-"
                                                                          recent-clj-kondo
                                                                          "-standalone.jar")))}
          build-server       {:doc     "Produces lsp server standalone jar"
-                             :depends [java1.8 update-project-clj -uberjar]
+                             :depends [update-project-clj -uberjar]
                              :task    (when (seq (fs/modified-since -uberjar ["server/project.clj" "server/src"]))
                                         (shell {:dir "server"}
                                                "lein with-profiles -user do clean, run -m clj-kondo.lsp-server.impl.version")
@@ -46,7 +40,7 @@
                              :task    (str "server/target/lsp-server-" recent-clj-kondo "-standalone.jar")}
 
          lsp-jar            {:doc     "Copies renamed jar for upload to clj-kondo repo"
-                             :depends [java1.8 build-server -jar]
+                             :depends [build-server -jar]
                              :task    (let [lsp-jar (fs/path (fs/parent -jar) (str "clj-kondo-" (fs/file-name -jar)))]
                                         (fs/copy -jar lsp-jar {:replace-existing true}))}
 
